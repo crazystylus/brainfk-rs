@@ -1,0 +1,14 @@
+[package]
+authors = ["Kartik Sharma <kartik.sharma522@gmail.com>"]
+categories = ["compiler", "command-line-utilities"]
+description = "A brainfuck compiler which compiles to raw wasm"
+name = "brainfk-rs"
+license = "MIT"
+version = "0.1.0"
+repository = "https://github.com/crazystylus/brainfk-rs.git"
+edition = "2021"
+
+[dependencies]
+clap = { version = "3.2.2", features = ["derive"] }
+wasm-encoder = "0.13"
+wasmparser = "0.86.0"
