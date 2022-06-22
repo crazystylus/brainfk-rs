@@ -56,7 +56,9 @@ pub(crate) fn minus(f: &mut Function) {
 /// Output the byte at the data pointer
 pub(crate) fn dot(f: &mut Function, target: &crate::Target) {
     match target {
-        Target::Browser => {}
+        Target::Browser => {
+            todo!();
+        }
         Target::Wasi => {
             // Write IO Vector
             f.instruction(&Instruction::I32Const(0));
@@ -86,7 +88,9 @@ pub(crate) fn dot(f: &mut Function, target: &crate::Target) {
 /// Accept one byte of input, storing its value in the byte at the data pointer
 pub(crate) fn comma(f: &mut Function, target: &crate::Target) {
     match target {
-        Target::Browser => {}
+        Target::Browser => {
+            todo!();
+        }
         Target::Wasi => {
             // Write IO Vector
             f.instruction(&Instruction::I32Const(0));

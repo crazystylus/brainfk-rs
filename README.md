@@ -1,39 +1,40 @@
 # Brainfk -> WASM
 ## Introduction
-This repo contains a brainfk compiler written in Rust which compiles code directly to wasm. Later the generated wasm file can be ran using wasmer.
+This repo contains a brainfk compiler written in Rust closely tied to wasm.
+
+### Features
+- Generate wasm from brainfk code
+- Compile and run brainfk code
+- Compile brainfk to wasmu (wasmer module serial format) which can run with wasmer-headless
+- Supports following backends
+  - LLVM (uses LLVM 12)
+  - Cranelift
+  - Singlepass
+
+### Usage
+```
+# JIT Compile & Execute brainfk code
+$ brainfk-rs run tests/files/hello.bf --backend cranelift
+Hello World!
+
+$ brainfk-rs generate-wasm tests/files/hello.bf hello.wasm --target wasi
+✔ Successfully generated wasm.
+
+$ brainfk-rs compile-wasmu tests/files/hello.bf hello.wasmu --backend cranelift
+✔ Compiled successfully to wasmu.
+Compiled file can be executed using wasmer-headless.
+
+# Running in wasmer-headless
+$ ./wasmer-headless run hello.wasmu
+Hello World!
+```
+
 ### Install Wasmer Runtime
 Follow this link to install wasmer-runtime
 https://docs.wasmer.io/ecosystem/wasmer/getting-started
 
-### Example
-```shell
-$ cargo run
-    Finished dev [unoptimized + debuginfo] target(s) in 0.01s
-     Running `target/debug/brainfk-rs`
-error: The following required arguments were not provided:
-    --target <TARGET>
-    <INPUT_FILE>
-    <OUTPUT_FILE>
-
-USAGE:
-    brainfk-rs --target <TARGET> <INPUT_FILE> <OUTPUT_FILE>
-
-For more information try --help
-
-$ cargo run -- tests/files/hello.f hello.wasm --target wasi
-   Compiling brainfk-rs v0.1.0 (/root/Documents/brainfk-rs)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.91s
-     Running `target/debug/brainfk-rs tests/files/hello.f abc.wasm --target wasi`
-
-$ wasmer run hello.wasm
-Hello World!
-```
-### Support
-- [X] WASI (It uses STDIN and STDOUT)
-- [ ] Browser
-
 ### TODO
 - [ ] Memory access validation and growth
-- [ ] Add support for JS/Browser
-- [ ] Integrate with wasmer and support run & compile
+- [x] Integrate with wasmer and support run & compile
 - [ ] Add testing
+- [ ] Add support for JS/Browser
