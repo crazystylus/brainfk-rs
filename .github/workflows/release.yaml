@@ -1,0 +1,104 @@
+name: release
+on:
+  push:
+    branches: [main]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  release:
+    name: ${{ matrix.target }}
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-18.04
+            target: x86_64-unknown-linux-gnu
+            llvm_url: 'https://github.com/wasmerio/llvm-custom-builds/releases/download/13.x/llvm-linux-amd64.tar.xz'
+          - os: macos-11.0
+            target: x86_64-apple-darwin
+          - os: macos-11.0
+            target: aarch64-apple-darwin
+          - os: windows-2019
+            target: x86_64-pc-windows-msvc
+            llvm_url: 'https://github.com/wasmerio/llvm-custom-builds/releases/download/13.x/llvm-windows-amd64.tar.xz'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set artifact name
+        shell: bash
+        run: |
+          version="$(git describe --tags --match='v*.*.*' --always)"
+          name="brainfk-rs-$version-${{ matrix.target }}"
+          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
+          echo "version: $version"
+          echo "artifact: $name"
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: ${{ matrix.target }}
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v1
+      - name: Install LLVM (macOS Apple Silicon)
+        if: matrix.os == 'macos-11.0'
+        run: |
+          brew install llvm
+          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+          echo "LLVM_SYS_120_PREFIX=$(brew --prefix llvm)" >> $GITHUB_ENV
+      - name: Install LLVM
+        if: matrix.llvm_url
+        shell: bash
+        run: |
+          LLVM_DIR=$(pwd)/${{ env.LLVM_DIR }}
+          mkdir -p ${LLVM_DIR}
+          curl --proto '=https' --tlsv1.2 -sSf "${{ matrix.llvm_url }}" -L -o - | tar xJv -C ${LLVM_DIR}
+          echo "${LLVM_DIR}/bin" >> $GITHUB_PATH
+          echo "LLVM_SYS_120_PREFIX=${LLVM_DIR}" >> $GITHUB_ENV
+        env:
+          LLVM_DIR: .llvm
+      - name: Build binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --locked --target=${{ matrix.target }} --color=always --verbose
+
+      - name: Package (UNIX)
+        if: runner.os != 'windows-2019'
+        run: >
+          tar -cv
+          LICENSE.md README.md
+          -C target/${{ matrix.target }}/release/ brainfk-rs
+          | xz -9 > '${{ env.ARTIFACT_NAME }}.tar.xz'
+      - name: Package (Windows)
+        if: runner.os == 'windows-2019'
+        run: >
+          7z a ${{ env.ARTIFACT_NAME }}.zip
+          ./target/${{ matrix.target }}/release/brainfk-rs.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            *.zip
+            *.tar.xz
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            *.zip
+            *.tar.xz
