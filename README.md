@@ -59,3 +59,6 @@ Toolchain Target: stable-x86_64-unknown-linux-gnu
 - [x] Add testing
 - [x] Benchmarks
 - [ ] Add support for JS/Browser
+- Optimizations
+  + [x] Stdout Buffering
+  + [ ] Reducing consecutive `+` and `-` operators
