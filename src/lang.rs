@@ -113,18 +113,27 @@ impl Language {
         let mut codes = CodeSection::new();
         // Local Declaration
         // Local 0 : I32 TAPE Pointer
+        // Local 1 : I32 I/O Buffer pointer
+        // Local 2 : I32 I/O Buffer max-size
+        // Local 3 : I32 I/O Vector start
         // ...
-        let locals = vec![(3, ValType::I32)];
+        let locals = vec![(4, ValType::I32)];
         let mut f = Function::new(locals);
 
         // <-- Linear Memory Model -->
         // ---------------------------
-        // | IOV  and Tmp |  TAPE    |
-        // 0-----------1024------4096|
+        // | I/O Buffer | I/O Vectors |  TAPE    |
+        // 0-----------516-----------1024------4096|
         // TODO: Check if memory pointer invalid
         // TODO: Tape expansion
         f.instruction(&Instruction::I32Const(1024));
         f.instruction(&Instruction::LocalSet(0));
+        f.instruction(&Instruction::I32Const(0));
+        f.instruction(&Instruction::LocalSet(1));
+        f.instruction(&Instruction::I32Const(1000));
+        f.instruction(&Instruction::LocalSet(2));
+        f.instruction(&Instruction::I32Const(1004));
+        f.instruction(&Instruction::LocalSet(3));
 
         // Symbol matching
         let mut fcount: u32 = 2;
@@ -146,7 +155,10 @@ impl Language {
                 }
             }
         }
-        // Cleanup
+
+        // Flush Stdout
+        compiler::flush_stdout(&mut f, target);
+        // Mark program end
         f.instruction(&Instruction::End);
 
         codes.function(&f);
