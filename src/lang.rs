@@ -1,15 +1,18 @@
 use crate::compiler;
 use crate::{Backend, Target};
 use std::collections::HashSet;
+use std::env::temp_dir;
 use std::fs;
 use std::io;
 
+use uuid::Uuid;
 use wasm_encoder::EntityType;
 use wasm_encoder::ExportSection;
 use wasm_encoder::{
     CodeSection, Function, FunctionSection, ImportSection, Instruction, MemorySection, MemoryType,
     Module, TypeSection, ValType,
 };
+use wasm_pack::{cache, wasm_opt};
 use wasmer::Module as WasmerModule;
 use wasmer::{Cranelift, Instance, Singlepass, Store, Universal, LLVM};
 use wasmer_wasi::{Stdin, Stdout, WasiState};
@@ -171,6 +174,30 @@ impl Language {
     /// Validate generated WASM bytecode
     pub fn validate(&self) -> Result<wasmparser::types::Types, wasmparser::BinaryReaderError> {
         wasmparser::validate(&self.wasm_bytes)
+    }
+
+    pub fn optimize(&mut self) {
+        // Generate tmpfir and files
+        let tmp_dir = temp_dir();
+
+        let mut unopt_file = tmp_dir.clone();
+        unopt_file.set_file_name(Uuid::new_v4().simple().to_string());
+        unopt_file.set_extension(".wasm");
+
+        fs::write(&unopt_file, &self.wasm_bytes).unwrap();
+
+        // Download and run wasm-opt
+        wasm_opt::run(
+            &cache::get_wasm_pack_cache().unwrap(),
+            tmp_dir.as_path(),
+            &["--flatten --precompute --optimize-instructions --local-cse".to_string()],
+            //&["-O4".to_string()],
+            true,
+        )
+        .unwrap();
+
+        // Update wasm-bytes
+        self.wasm_bytes = fs::read(&unopt_file).unwrap();
     }
 
     /// Write generated WASM bytecode to file

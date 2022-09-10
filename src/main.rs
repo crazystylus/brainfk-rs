@@ -85,6 +85,7 @@ fn main() -> Result<(), io::Error> {
             brainfk.parse(input_file)?;
             brainfk.generate_wasm(&Target::Wasi)?; // Only WASI can run natively
             brainfk.validate().unwrap();
+            brainfk.optimize();
             brainfk.run(backend);
         }
         Command::GenerateWasm {
@@ -95,6 +96,7 @@ fn main() -> Result<(), io::Error> {
             brainfk.parse(input_file)?;
             brainfk.generate_wasm(target)?;
             brainfk.validate().unwrap();
+            brainfk.optimize();
             brainfk.write_wasm(output_file)?;
             println!("✔ Successfully generated wasm.");
         }
@@ -106,6 +108,7 @@ fn main() -> Result<(), io::Error> {
             brainfk.parse(input_file)?;
             brainfk.generate_wasm(&Target::Wasi)?;
             brainfk.validate().unwrap();
+            brainfk.optimize();
             brainfk.compile_wasmu(output_file, backend).unwrap();
             println!("✔ Compiled successfully to wasmu.");
             println!("Compiled file can be executed using wasmer-headless.");
@@ -118,6 +121,7 @@ fn main() -> Result<(), io::Error> {
             brainfk.parse(input_file)?;
             brainfk.generate_wasm(&Target::Wasi)?; // Only WASI can generate a binary
             brainfk.validate().unwrap();
+            brainfk.optimize();
             brainfk.compile_binary(output_file, backend).unwrap();
         }
     }
