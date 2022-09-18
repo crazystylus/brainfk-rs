@@ -19,14 +19,19 @@ wasm-pack = "0.10.3"
 [dependencies.uuid]
 version = "1.1.2"
 features = [
-    "v4",          
-    "fast-rng", 
+    "v4",
+    "fast-rng",
     "macro-diagnostics"
 ]
 
 [dev-dependencies]
 assert_cmd = "2.0"
 predicates = "2.1"
+criterion = "0.4"
+
+[[bench]]
+name = "wasm_benchmark"
+harness = false
 
 [profile.release]
 strip = "symbols"

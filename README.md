@@ -53,6 +53,13 @@ Rust: rustc 1.61.0 (fe5b13d68 2022-05-18)
 Toolchain Target: stable-x86_64-unknown-linux-gnu
 ```
 
+### Performing a Benchmark
+Criterion-rs is used for benchmarking and report is generated in target dir.
+```
+cargo build --release --bench
+cargo bench
+```
+
 ## TODO
 - [ ] Memory access validation and growth
 - [x] Integrate with wasmer and support run & compile
