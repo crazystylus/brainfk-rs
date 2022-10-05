@@ -7,7 +7,7 @@ This repo contains a brainfk compiler written in Rust closely tied to wasm.
 - Compile and run brainfk code
 - Compile brainfk to wasmu (wasmer module serial format) which can run with wasmer-headless
 - Supports following backends
-  - LLVM (uses LLVM 12)
+  - LLVM (uses LLVM 14)
   - Cranelift
   - Singlepass
 
@@ -37,28 +37,35 @@ https://docs.wasmer.io/ecosystem/wasmer/getting-started
 
 | Command | Mean [s] | Min [s] | Max [s] |
 |:---|---:|---:|---:|
-| `mandelbrot-extreme.bf` | 107.083 ± 0.351 | 106.708 | 107.750 |
-| `mandelbrot-titannic.bf` | 20.341 ± 0.067 | 20.242 | 20.415 |
-| `mandelbrot-huge.bf` | 4.222 ± 0.057 | 4.109 | 4.288 |
-| `mandelbrot.bf` | 0.835 ± 0.005 | 0.828 | 0.844 |
-| `mandelbrot-tiny.bf` | 0.204 ± 0.002 | 0.202 | 0.208 |
+| `mandelbrot-extreme.bf` | 72.278 | 72.273 | 72.282 |
+| `mandelbrot-titannic.bf` | 13.979 | 13.975 | 13.982 |
+| `mandelbrot-huge.bf` | 2.9724 | 2.9729 | 2.9733 |
+| `mandelbrot.bf` | 0.56329 | 0.56318  | 0.56340 |
+| `mandelbrot-tiny.bf` | 0.14279 | 0.14277  | 0.14281 |
 
 ### Benchmark Environment
 ```
-CPU: i7-1165G7 (8) @ 4.700GHz
-Memory: 16GB LPDDR4 4267 MT/s
+CPU:Ryzen 5 5600X (12) @ 3.700GHz
+Memory: 16GB DDR4 3400 MT/s
 Linux: Pop!_OS 22.04 LTS x86_64
-Kernel: 5.17.15-76051715-generic
-Rust: rustc 1.61.0 (fe5b13d68 2022-05-18)
+Kernel: 5.19.0-76051900-generic
+Rust: rustc 1.64.0 (a55dd71d5 2022-09-19)
 Toolchain Target: stable-x86_64-unknown-linux-gnu
 ```
 
+### Performing a Benchmark
+Criterion-rs is used for benchmarking and report is generated in target dir.
+```
+cargo build --release --bench
+cargo bench
+```
+
 ## TODO
-- [ ] Memory access validation and growth
+- [ ] Runtime memory check and growth
 - [x] Integrate with wasmer and support run & compile
 - [x] Add testing
 - [x] Benchmarks
-- [ ] Add support for JS/Browser
+- [x] Add support for JS/Browser
 - Optimizations
   + [x] Stdout Buffering
-  + [ ] Reducing consecutive `+` and `-` operators
+  + [x] Utilize wasm-opt
