@@ -1,4 +1,5 @@
 /target
+/criterion
 *.wasm
 *.wasmu
 *.out

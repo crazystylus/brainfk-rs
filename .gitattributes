@@ -1,0 +1,2 @@
+/tests/files/* eol=lf linguist-vendored text
+/benches/code/* eol=lf linguist-vendored text
